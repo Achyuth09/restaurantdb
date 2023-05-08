@@ -15,6 +15,7 @@ namespace RestaurantAPI.Models
         public string CatName { get; set; } = null!;
         public string? CatImage { get; set; }
         public bool IsDeleted { get; set; }
+        public string? CatDescription { get; set; }
 
         public virtual ICollection<CategoryDish> CategoryDishes { get; set; }
         public virtual ICollection<MenuCategory> MenuCategories { get; set; }

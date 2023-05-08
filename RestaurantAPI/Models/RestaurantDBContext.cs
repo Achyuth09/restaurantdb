@@ -7,9 +7,9 @@ namespace RestaurantAPI.Models
 {
     public partial class RestaurantDBContext : DbContext
     {
-       /* public RestaurantDBContext()
+        public RestaurantDBContext()
         {
-        }*/
+        }
 
         public RestaurantDBContext(DbContextOptions<RestaurantDBContext> options)
             : base(options)
@@ -23,14 +23,14 @@ namespace RestaurantAPI.Models
         public virtual DbSet<MenuCategory> MenuCategories { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
 
-       /* protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer();
+                optionsBuilder.UseSqlServer("Server=M5387491\\SQLEXPRESS;Database=RestaurantDB;Trusted_Connection=True;");
             }
-        }*/
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +42,10 @@ namespace RestaurantAPI.Models
                 entity.ToTable("Category");
 
                 entity.Property(e => e.CatId).HasColumnName("catId");
+
+                entity.Property(e => e.CatDescription)
+                    .HasColumnType("text")
+                    .HasColumnName("catDescription");
 
                 entity.Property(e => e.CatImage)
                     .HasMaxLength(1000)
@@ -117,6 +121,10 @@ namespace RestaurantAPI.Models
                 entity.Property(e => e.MenuId).HasColumnName("menuId");
 
                 entity.Property(e => e.IsDeleted).HasColumnName("isDeleted");
+
+                entity.Property(e => e.MenuDescription)
+                    .HasColumnType("text")
+                    .HasColumnName("menuDescription");
 
                 entity.Property(e => e.MenuImage)
                     .HasMaxLength(1000)

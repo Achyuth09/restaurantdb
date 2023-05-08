@@ -79,55 +79,39 @@ namespace RestaurantAPI.Controllers
 
 
 
-        /*// PUT: api/Menus/5
+        // PUT: api/Menus/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMenu(int id, Menu menu)
-        {
-            if (id != menu.MenuId)
-            {
-                return BadRequest();
-            }
+        public async Task<IActionResult> PutMenu(int id, Menu menu)
+        {
+            if (id != menu.MenuId)
+            {
+                return BadRequest();
+            }
 
- 
+            _context.Entry(menu).State = EntityState.Modified;
 
- 
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!MenuExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
- 
+            return NoContent();
+        }
 
-            _context.Entry(menu).State = EntityState.Modified;
 
- 
 
- 
-
- 
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MenuExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
- 
-
- 
-
- 
-
-            return NoContent();
-        }
-*/
         // POST: api/Menus
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -139,6 +123,21 @@ namespace RestaurantAPI.Controllers
             }
             _context.Menus.Add(menu);
             await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (MenuExists(menu.MenuId))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
 
 
@@ -151,38 +150,58 @@ namespace RestaurantAPI.Controllers
 
 
 
-        /* // DELETE: api/Menus/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMenu(int id)
-        {
-            if (_context.Menus == null)
-            {
-                return NotFound();
-            }
-            var menu = await _context.Menus.FindAsync(id);
-            if (menu == null)
-            {
-                return NotFound();
-            }
+        // DELETE: api/Menus/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteMenu(int id)
+        {
+            if (_context.Menus == null)
+            {
+                return NotFound();
+            }
+            var menu = await _context.Menus.FindAsync(id);
+            if (menu == null)
+            {
+                return NotFound();
+            }
+            List<Menu> menuTables = await _context.Menus.ToListAsync();
+            foreach (var menuTab in menuTables)
+            {
+                if(menuTab.MenuId == id && menuTab.IsDeleted == false)
+                {
+                   menuTab.IsDeleted = true;
+                    _context.Menus.Update(menuTab);
+                    _context.SaveChanges();
+                }
+            }
+            List<MenuCategory> menuCategories = await _context.MenuCategories.ToListAsync();
+            foreach (var menuCat in menuCategories)
+            {
+                if (menuCat.MenuId == id && menuCat.IsDeleted == false)
+                {
+                    menuCat.IsDeleted = true;
+                    _context.MenuCategories.Update(menuCat);
+                    _context.SaveChanges();
+                }
+            }
 
- 
 
- 
 
- 
 
-            _context.Menus.Remove(menu);
-            await _context.SaveChangesAsync();
 
- 
 
- 
 
- 
+           // _context.Menus.Remove(menu);
+            await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
-*/
+
+
+
+
+
+
+            return NoContent();
+        }
+
         private bool MenuExists(int id)
         {
             return (_context.Menus?.Any(e => e.MenuId == id)).GetValueOrDefault();

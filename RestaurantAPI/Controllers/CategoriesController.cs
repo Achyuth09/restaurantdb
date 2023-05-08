@@ -108,55 +108,36 @@ namespace RestaurantAPI.Controllers
 
 
 
-        /*// PUT: api/Categories/5
+        // PUT: api/Categories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, Category category)
-        {
-            if (id != category.CatId)
-            {
-                return BadRequest();
-            }
+        public async Task<IActionResult> PutCategory(int id, Category category)
+        {
+            if (id != category.CatId)
+            {
+                return BadRequest();
+            }
 
- 
+            _context.Entry(category).State = EntityState.Modified;
 
- 
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CategoryExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return NoContent();
+        }
 
- 
-
-            _context.Entry(category).State = EntityState.Modified;
-
- 
-
- 
-
- 
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CategoryExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
- 
-
- 
-
- 
-
-            return NoContent();
-        }
-*/
         // POST: api/Categories
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("{menuId}")]
@@ -171,19 +152,30 @@ namespace RestaurantAPI.Controllers
 
             // adding category to category table
             _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
 
 
 
-
-
-            // updating menu_category table
-            MenuCategory menuCategory = new MenuCategory();
-            menuCategory.MenuId = menuId;
-            menuCategory.CatId = category.CatId;
-            _context.MenuCategories.Add(menuCategory);
-            await _context.SaveChangesAsync();
-
+            try
+            {
+                await _context.SaveChangesAsync();
+                // updating menu_category table
+                MenuCategory menuCategory = new MenuCategory();
+                menuCategory.MenuId = menuId;
+                menuCategory.CatId = category.CatId;
+                _context.MenuCategories.Add(menuCategory);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (CategoryExists(category.CatId))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
 
 
@@ -226,7 +218,16 @@ namespace RestaurantAPI.Controllers
                 }
             }
 
-
+            List<Category> categoryTables = await _context.Categories.ToListAsync();
+            foreach (var categoryTab in categoryTables)
+            {
+                if (categoryTab.CatId == id && categoryTab.IsDeleted == false)
+                {
+                    categoryTab.IsDeleted = true;
+                    _context.Categories.Update(categoryTab);
+                    _context.SaveChanges();
+                }
+            }
 
 
 

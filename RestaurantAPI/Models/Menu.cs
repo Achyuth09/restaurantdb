@@ -14,6 +14,7 @@ namespace RestaurantAPI.Models
         public string MenuName { get; set; } = null!;
         public string? MenuImage { get; set; }
         public bool IsDeleted { get; set; }
+        public string? MenuDescription { get; set; }
 
         public virtual ICollection<MenuCategory> MenuCategories { get; set; }
     }
